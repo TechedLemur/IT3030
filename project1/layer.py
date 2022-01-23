@@ -19,12 +19,12 @@ class Layer():
 
     def forward_pass(self, y) -> np.array:
         self.a = y @ self.W + self.b
-        self.o = self.f(self.a)
+        self.z = self.f(self.a)
         self.df = self.f_prime(self.a)  # df = JZSum-diagonal
         self.Jzy = np.einsum('ij,i->ij', self.W.T, self.df)  # Numerator form
         self.Jzw_hat = np.outer(y, self.df)
 
-        return self.o
+        return self.z
 
     # Jlz is the jacobian matrix J L/Z , where L is the loss function and Z is the next layer
     def backward_pass(self, Jlz):

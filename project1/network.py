@@ -12,14 +12,20 @@ class Network():
         self.lr = lr
 
     def fit(self, x_train, y_train, epochs=100):
+        scores = []
         for i in range(epochs):
-
+            score = 0
             for x, y in zip(x_train, y_train):
                 result = self.forward_pass(x)
 
                 Jlz = self.d_l2_loss(y, result)
+                score += self.l2_loss(y, result)
 
                 self.backward_pass(Jlz)
+
+            scores.append(np.array([i, score / len(x_train)]))
+
+        return scores
 
     def d_l2_loss(self, y_true, y_pred):
         return y_pred-y_true
