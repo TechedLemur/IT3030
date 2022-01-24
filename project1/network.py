@@ -1,6 +1,6 @@
 import numpy as np
 from layer import Layer
-from activation_functions import softmax
+from activation_functions import Sigmoid, ReLu
 from loss_functions import MSE, d_MSE
 
 
@@ -9,7 +9,11 @@ class Network():
     def __init__(self, neurons: np.array, lr=0.01, loss=MSE, d_loss=d_MSE) -> None:
         self.layers = []
         for i in range(len(neurons)-1):
-            self.layers.append(Layer(neurons[i], neurons[i+1], lr=lr))
+            if i == len(neurons)-2:
+                self.layers.append(
+                    Layer(neurons[i], neurons[i+1], lr=lr, activation=Sigmoid()))
+            else:
+                self.layers.append(Layer(neurons[i], neurons[i+1], lr=lr))
         self.lr = lr
         self.loss = MSE
         self.d_loss = d_MSE

@@ -1,11 +1,11 @@
 from importlib_metadata import SelectableGroups
 import numpy as np
-from activation_functions import sigmoid, d_sigmoid
+from activation_functions import sigmoid, d_sigmoid, Sigmoid, ReLu
 
 
 class Layer():
 
-    def __init__(self, inD, outD, lr=0.01, f=sigmoid, f_prime=d_sigmoid) -> None:
+    def __init__(self, inD, outD, lr=0.01, activation=ReLu()) -> None:
         # init random weights between -0.1 and 0.1
         self.W = (np.random.rand(inD, outD) - 0.5) / 5
         # init random bias weights between -0.1 and 0.1
@@ -13,14 +13,13 @@ class Layer():
         self.lr = lr
         self.a = None  # summed outputs
         self.z = None  # f(a)
-        self.f = f
-        self.f_prime = f_prime
-    # Performs the forward pass given input x (row vector)
+        self.activation = activation
 
+    # Performs the forward pass given input x (row vector)
     def forward_pass(self, y) -> np.array:
         self.a = y @ self.W + self.b
-        self.z = self.f(self.a)
-        self.df = self.f_prime(self.a)  # df = JZSum-diagonal
+        self.z = self.activation.f(self.a)
+        self.df = self.activation.f_prime(self.a)  # df = JZSum-diagonal
         self.Jzy = np.einsum('ij,i->ij', self.W.T, self.df)  # Numerator form
         self.Jzw_hat = np.outer(y, self.df)
 
@@ -41,4 +40,4 @@ class Layer():
         return f"Layer - shape: {self.W.shape}, f(a): {self.z}"
 
     def __repr__(self):
-        return f"Layer - shape: {self.W.shape}, f(a): {self.z}"
+        return f"Layer - shape: {self.W.shape}, f(a): {self.z}, activation: {self.activation}"
