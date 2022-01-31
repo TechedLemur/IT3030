@@ -30,11 +30,12 @@ def d_softmax(s):
 
 
 class Sigmoid():
-
-    def f(self, x):
+    @staticmethod
+    def f(x):
         return sigmoid(x)
 
-    def f_prime(self, x):
+    @staticmethod
+    def f_prime(x):
         return d_sigmoid(x)
 
     def __str__(self) -> str:
@@ -45,14 +46,16 @@ class Sigmoid():
 
 
 class Softmax():
-
-    def f(self, x):
+    @staticmethod
+    def f(x):
         return softmax(x)
 
-    def jacobian(self, s):
+    @staticmethod
+    def jacobian(s):
         return d_softmax(s)
 
-    def f_prime(self, x):
+    @staticmethod
+    def f_prime(x):
         s = softmax(x)
         return d_softmax(s)
 
@@ -64,10 +67,12 @@ class Softmax():
 
 
 class ReLu():
-    def f(self, x):
+    @staticmethod
+    def f(x):
         return np.maximum(0, x)
 
-    def f_prime(self, x):
+    @staticmethod
+    def f_prime(x):
         return np.greater(x, 0).astype(np.float32)
 
     def __str__(self) -> str:
