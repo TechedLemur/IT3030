@@ -16,8 +16,9 @@ class Network():
         self.loss_function = Globals.LOSS_FUNCION
         self.softmax = Globals.SOFTMAX
 
-    def fit(self, x_train, y_train, epochs=100):
-        scores = []
+    def fit(self, x_train, y_train, epochs=Globals.EPOCHS, valid=None):
+        self.train_scores = []
+        self.valid_scores = []
         for i in range(epochs):
             score = 0
             for x, y in zip(x_train, y_train):
@@ -34,9 +35,16 @@ class Network():
 
                 self.backward_pass(Jlz)
 
-            scores.append(np.array([i, score / len(x_train)]))
+            self.train_scores.append(np.array([i, score / len(x_train)]))
 
-        return scores
+            if valid:
+                score = 0
+                for x, y in zip(valid.x, valid.y):
+                    score += self.loss_function.f(y, self.predict(x))
+
+                self.valid_scores.append(np.array([i, score / (len(valid.x))]))
+
+        return self.train_scores, self.valid_scores
 
     def predict(self, x_test):
         return self.forward_pass(x_test)
