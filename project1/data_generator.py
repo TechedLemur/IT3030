@@ -60,6 +60,26 @@ class DataGenerator:
         img[x, y-v_length:y+v_length] = np.True_
         return img
 
+    @staticmethod
+    def Circle(size: int = 16, center=False):
+
+        if center:
+            lower_bound = int(size/2) - 1
+            upper_bound = int(size/2) + 2
+        else:
+            lower_bound = 5
+            upper_bound = size - 5
+
+        x = np.random.randint(lower_bound, upper_bound)
+
+        y = np.random.randint(x-2, x+3)
+
+        r = min(x - 1, size - x-1, y - 1, size - y-1,
+                np.random.random_integers(int(size/4), int(size/2)))
+
+        x_ind, y_ind = np.indices((size, size))
+        return np.abs(np.hypot(x - x_ind, y - y_ind)-r) < 0.5
+
     # Returns an image with added random noise with probability p
 
     @staticmethod
