@@ -53,4 +53,17 @@ class Config:
 
     ]
 
-    Dataset = []
+    # Dataset parameters
+    # Size of the whole dataset, including validation and test set.
+    DATASET_SIZE = 1000
+
+    CENTER_IMAGES = False
+    NOISE_PROBABILITY = 0.01
+
+    IMAGE_SIZE = 16
+    HEIGHT_RANGE = (2, 14)
+    WIDTH_RANGE = (2, 14)
+
+    TEST_SET_PORTION = 0.1
+    VALIDATION_SET_PORTION = 0.2
+    # Training set becomes the remaining portion

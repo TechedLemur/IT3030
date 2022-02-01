@@ -1,7 +1,28 @@
+
+from config import Config
 import numpy as np
 
 
+class Data():
+    def __init__(self, img, y) -> None:
+        self.y = y.astype(np.int8)
+        self.img = img
+        self.x = img.flatten().astype(np.int8)
+
+
+class DataSet():
+    def __init__(self, data_list) -> None:
+        self.data = data_list
+        self.x = list(map(lambda d: d.x, data_list))
+        self.y = list(map(lambda d: d.y, data_list))
+
+
 class DataGenerator:
+
+    HORIZONTAL_ID = np.array([1, 0, 0, 0])
+    VERTICAL_ID = np.array([0, 1, 0, 0])
+    CROSS_ID = np.array([0, 0, 1, 0])
+    CIRCLE_ID = np.array([0, 0, 0, 1])
 
     @staticmethod
     def HorizontalBar(size: int = 16, center=False):
@@ -88,3 +109,94 @@ class DataGenerator:
         mask = np.random.choice(a=[True, False], size=img.shape, p=[p, 1-p])
 
         return np.bitwise_xor(img, mask)
+
+    @staticmethod
+    def GetCircles(n: int, size: int = 16, noise: float = 0.01, center=False):
+        c = []
+
+        for _ in range(n):
+            c.append(Data(DataGenerator.AddNoise(
+                DataGenerator.Circle(size, center)), DataGenerator.CIRCLE_ID))
+
+        return c
+
+    @staticmethod
+    def GetHorizontalBars(n: int, size: int = 16, noise: float = 0.01, center=False):
+        c = []
+
+        for _ in range(n):
+            c.append(Data(DataGenerator.AddNoise(DataGenerator.HorizontalBar(
+                size, center)), DataGenerator.HORIZONTAL_ID))
+
+        return c
+
+    @staticmethod
+    def GetVerticalBars(n: int, size: int = 16, noise: float = 0.01, center=False):
+        c = []
+
+        for _ in range(n):
+            c.append(Data(DataGenerator.AddNoise(
+                DataGenerator.VerticalBar(size, center)), DataGenerator.VERTICAL_ID))
+
+        return c
+
+    @staticmethod
+    def GetCrosses(n: int, size: int = 16, noise: float = 0.01, center=False):
+        c = []
+
+        for _ in range(n):
+            c.append(Data(DataGenerator.AddNoise(
+                DataGenerator.Cross(size, center)), DataGenerator.CROSS_ID))
+
+        return c
+
+    @staticmethod
+    def GetTrainTestValid():
+        train_size = int(Config.DATASET_SIZE * (1 -
+                         (Config.TEST_SET_PORTION + Config.VALIDATION_SET_PORTION)))
+
+        if train_size < 0:
+            raise Exception("Illegal test and train set portions")
+
+        test_size = int((Config.DATASET_SIZE - train_size) * Config.TEST_SET_PORTION /
+                        (Config.TEST_SET_PORTION + Config.VALIDATION_SET_PORTION))
+
+        valid_size = Config.DATASET_SIZE - train_size - test_size
+
+        h = int(0.25*train_size)
+        v = int(0.25*train_size)
+        cr = int(0.25*train_size)
+        ci = train_size - (h+v+cr)
+
+        train = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + \
+            DataGenerator.GetVerticalBars(
+                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCrosses(
+                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCircles(
+                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES)
+
+        h = int(0.25*test_size)
+        v = int(0.25*test_size)
+        cr = int(0.25*test_size)
+        ci = test_size - (h+v+cr)
+
+        test = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + \
+            DataGenerator.GetVerticalBars(
+                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCrosses(
+                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCircles(
+                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES)
+
+        h = int(0.25*valid_size)
+        v = int(0.25*valid_size)
+        cr = int(0.25*valid_size)
+        ci = valid_size - (h+v+cr)
+
+        valid = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + \
+            DataGenerator.GetVerticalBars(
+                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCrosses(
+                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCircles(
+                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES)
+
+        np.random.shuffle(train)
+        np.random.shuffle(test)
+        np.random.shuffle(valid)
+        return DataSet(train), DataSet(test), DataSet(valid)
