@@ -25,55 +25,43 @@ class DataGenerator:
     CIRCLE_ID = np.array([0, 0, 0, 1])
 
     @staticmethod
-    def HorizontalBar(size: int = 16, center=False):
+    def HorizontalBar(size: int = 16):
 
         img = np.zeros((size, size), dtype=np.bool)
 
-        if center:
-            lower_bound = int(size/2) - 3
-            upper_bound = int(size/2) + 4
-        else:
-            lower_bound = 1
-            upper_bound = size - 1
+        lower_bound = max(1, Config.Y_RANGE[0])
+        upper_bound = min(Config.Y_RANGE[1], size - 1)
 
         for i in np.random.choice(np.arange(lower_bound, upper_bound), np.random.randint(1, min(int(size/4), upper_bound-lower_bound - 1))):
             img[i, :] = np.True_
         return img
 
     @staticmethod
-    def VerticalBar(size: int = 16, center=False):
+    def VerticalBar(size: int = 16):
 
         img = np.zeros((size, size), dtype=np.bool)
 
-        if center:
-            lower_bound = int(size/2) - 3
-            upper_bound = int(size/2) + 4
-        else:
-            lower_bound = 1
-            upper_bound = size - 1
+        lower_bound = max(1, Config.X_RANGE[0])
+        upper_bound = min(Config.X_RANGE[1], size - 1)
 
         for i in np.random.choice(np.arange(lower_bound, upper_bound), np.random.randint(1, min(int(size/4), upper_bound-lower_bound - 1))):
             img[:, i] = np.True_
         return img
 
     @staticmethod
-    def Cross(size: int = 16, center=False):
+    def Cross(size: int = 16):
 
         img = np.zeros((size, size), dtype=np.bool)
 
-        if center:
-            lower_bound = int(size/2) - 1
-            upper_bound = int(size/2) + 2
-        else:
-            lower_bound = 5
-            upper_bound = size - 5
+        lower_bound = max(5, Config.X_RANGE[0])
+        upper_bound = min(Config.X_RANGE[1], size - 5)
 
         x = np.random.randint(lower_bound, upper_bound)
 
         y = np.random.randint(x-2, x+3)
 
         h_length = min(x - 1, size - x-1,
-                       np.random.random_integers(int(size/4), int(size/2)))
+                       np.random.random_integers(Config.RADIUS_RANGE[0], Config.RADIUS_RANGE[1]))
         v_length = min(y - 1, size - y-1,
                        np.random.random_integers(h_length-2, h_length+2))
 
@@ -82,21 +70,17 @@ class DataGenerator:
         return img
 
     @staticmethod
-    def Circle(size: int = 16, center=False):
+    def Circle(size: int = 16):
 
-        if center:
-            lower_bound = int(size/2) - 1
-            upper_bound = int(size/2) + 2
-        else:
-            lower_bound = 5
-            upper_bound = size - 5
+        lower_bound = max(5, Config.X_RANGE[0])
+        upper_bound = min(Config.X_RANGE[1], size - 5)
 
         x = np.random.randint(lower_bound, upper_bound)
 
         y = np.random.randint(x-2, x+3)
 
         r = min(x - 1, size - x-1, y - 1, size - y-1,
-                np.random.random_integers(int(size/4), int(size/2)))
+                np.random.random_integers(Config.RADIUS_RANGE[0], Config.RADIUS_RANGE[1]))
 
         x_ind, y_ind = np.indices((size, size))
         return np.abs(np.hypot(x - x_ind, y - y_ind)-r) < 0.5
@@ -111,42 +95,42 @@ class DataGenerator:
         return np.bitwise_xor(img, mask)
 
     @staticmethod
-    def GetCircles(n: int, size: int = 16, noise: float = 0.01, center=False):
+    def GetCircles(n: int, size: int = 16, noise: float = 0.01):
         c = []
 
         for _ in range(n):
             c.append(Data(DataGenerator.AddNoise(
-                DataGenerator.Circle(size, center)), DataGenerator.CIRCLE_ID))
+                DataGenerator.Circle(size), noise), DataGenerator.CIRCLE_ID))
 
         return c
 
     @staticmethod
-    def GetHorizontalBars(n: int, size: int = 16, noise: float = 0.01, center=False):
+    def GetHorizontalBars(n: int, size: int = 16, noise: float = 0.01):
         c = []
 
         for _ in range(n):
             c.append(Data(DataGenerator.AddNoise(DataGenerator.HorizontalBar(
-                size, center)), DataGenerator.HORIZONTAL_ID))
+                size), noise), DataGenerator.HORIZONTAL_ID))
 
         return c
 
     @staticmethod
-    def GetVerticalBars(n: int, size: int = 16, noise: float = 0.01, center=False):
+    def GetVerticalBars(n: int, size: int = 16, noise: float = 0.01):
         c = []
 
         for _ in range(n):
             c.append(Data(DataGenerator.AddNoise(
-                DataGenerator.VerticalBar(size, center)), DataGenerator.VERTICAL_ID))
+                DataGenerator.VerticalBar(size), noise), DataGenerator.VERTICAL_ID))
 
         return c
 
     @staticmethod
-    def GetCrosses(n: int, size: int = 16, noise: float = 0.01, center=False):
+    def GetCrosses(n: int, size: int = 16, noise: float = 0.01):
         c = []
 
         for _ in range(n):
             c.append(Data(DataGenerator.AddNoise(
-                DataGenerator.Cross(size, center)), DataGenerator.CROSS_ID))
+                DataGenerator.Cross(size), noise), DataGenerator.CROSS_ID))
 
         return c
 
@@ -168,33 +152,33 @@ class DataGenerator:
         cr = int(0.25*train_size)
         ci = train_size - (h+v+cr)
 
-        train = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + \
+        train = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + \
             DataGenerator.GetVerticalBars(
-                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCrosses(
-                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCircles(
-                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES)
+                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + DataGenerator.GetCrosses(
+                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + DataGenerator.GetCircles(
+                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY)
 
         h = int(0.25*test_size)
         v = int(0.25*test_size)
         cr = int(0.25*test_size)
         ci = test_size - (h+v+cr)
 
-        test = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + \
+        test = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + \
             DataGenerator.GetVerticalBars(
-                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCrosses(
-                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCircles(
-                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES)
+                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + DataGenerator.GetCrosses(
+                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + DataGenerator.GetCircles(
+                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY)
 
         h = int(0.25*valid_size)
         v = int(0.25*valid_size)
         cr = int(0.25*valid_size)
         ci = valid_size - (h+v+cr)
 
-        valid = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + \
+        valid = DataGenerator.GetHorizontalBars(h, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + \
             DataGenerator.GetVerticalBars(
-                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCrosses(
-                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES) + DataGenerator.GetCircles(
-                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY, Config.CENTER_IMAGES)
+                v, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + DataGenerator.GetCrosses(
+                cr, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY) + DataGenerator.GetCircles(
+                ci, Config.IMAGE_SIZE, Config.NOISE_PROBABILITY)
 
         np.random.shuffle(train)
         np.random.shuffle(test)
