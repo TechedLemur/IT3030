@@ -19,6 +19,8 @@ class Network():
     def fit(self, x_train, y_train, epochs=Globals.EPOCHS, valid=None):
         self.train_scores = []
         self.valid_scores = []
+        self.omega1 = []
+        self.omega2 = []
         for i in range(epochs):
             score = 0
             for x, y in zip(x_train, y_train):
@@ -43,6 +45,15 @@ class Network():
                     score += self.loss_function.f(y, self.predict(x))
 
                 self.valid_scores.append(np.array([i, score / (len(valid.x))]))
+
+            o1 = 0
+            o2 = 0
+            for l in self.layers:
+                o1 += np.sum(np.abs(l.W))
+                o2 += 0.5 * np.sum(l.W ** 2)
+
+            self.omega1.append(np.array([i, o1 * self.l1_alpha]))
+            self.omega2.append(np.array([i, o2 * self.l2_alpha]))
 
         return self.train_scores, self.valid_scores
 

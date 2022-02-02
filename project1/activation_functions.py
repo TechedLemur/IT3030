@@ -80,3 +80,32 @@ class ReLu():
 
     def __repr__(self):
         return "ReLu"
+
+
+class TanH():
+
+    @staticmethod
+    def f(x):
+        return np.tanh(x)
+
+    @staticmethod
+    def f_prime(x):
+        f = TanH.f(x)
+        return 1 - f ** 2
+
+    def __str__(self) -> str:
+        return "tanh"
+
+    def __repr__(self):
+        return "tanh"
+
+
+class Linear():
+
+    @staticmethod
+    def f(x):
+        return x
+
+    @staticmethod
+    def f_prime(x):
+        return np.ones(x.shape)

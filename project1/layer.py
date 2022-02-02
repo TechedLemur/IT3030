@@ -7,10 +7,18 @@ from config import Globals
 class Layer():
 
     def __init__(self, layerConfig=None) -> None:
-        # init random weights between -0.1 and 0.1
-        self.W = (np.random.rand(layerConfig.inD, layerConfig.outD) - 0.5) / 5
-        # init random bias weights between -0.1 and 0.1
-        self.b = (np.random.rand(layerConfig.outD)-0.5) * 5
+        # init random weights between 0 and 1
+        W = np.random.rand(layerConfig.inD, layerConfig.outD)
+        # Scale initial weights
+        self.W = W * \
+            layerConfig.initial_weight_range[0] + \
+            (1-W) * layerConfig.initial_weight_range[1]
+        # init random bias weights between 0 and 1
+        b = np.random.rand(layerConfig.outD)
+        # Scale bias weights
+        self.b = b * \
+            layerConfig.initial_weight_range[0] + \
+            (1-b) * layerConfig.initial_weight_range[1]
         self.lr = layerConfig.lr
         self.l1_alpha = Globals.L1_ALPHA
         self.l2_alpha = Globals.L2_ALPHA

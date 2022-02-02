@@ -8,8 +8,8 @@ from loss_functions import MSE, CrossEntropy
 class Globals:
     LOSS_FUNCION = MSE  # Options: MSE, CrossEntropy
     LR = 0.01
-    L1_ALPHA = 0.000000
-    L2_ALPHA = 0.000000
+    L1_ALPHA = 0.0000
+    L2_ALPHA = 0.0001
     SOFTMAX = False
 
     EPOCHS = 100
@@ -17,11 +17,12 @@ class Globals:
 
 class LayerConfig:
 
-    def __init__(self, inD=None, outD=None, lr=Globals.LR, activation=ReLu) -> None:
+    def __init__(self, inD=None, outD=None, lr=Globals.LR, activation=ReLu, initial_weight_range=(-0.5, 0.5)) -> None:
         self.inD = inD
         self.outD = outD
         self.lr = lr
         self.activation = activation
+        self.initial_weight_range = initial_weight_range
 
 
 class Config:
@@ -45,18 +46,28 @@ class Config:
                     outD=100,  # Output dimension
                     lr=0.01,  # Learning rate
                     activation=ReLu,  # Activation function
+                    initial_weight_range=(-0.5, 0.5)
+                    ),
+
+        LayerConfig(inD=100,  # Input dimension
+                    outD=100,  # Output dimension
+                    lr=0.01,  # Learning rate
+                    activation=ReLu,  # Activation function
+                    initial_weight_range=(-0.5, 0.5)
                     ),
 
         LayerConfig(inD=100,  # Input dimension
                     outD=50,  # Output dimension
                     lr=0.01,  # Learning rate
                     activation=ReLu,  # Activation function
+                    initial_weight_range=(-0.5, 0.5)
                     ),
 
         LayerConfig(inD=50,  # Input dimension
                     outD=4,  # Output dimension
                     lr=0.01,  # Learning rate
                     activation=Sigmoid,  # Activation function
+                    initial_weight_range=(-0.5, 0.5)
                     ),
 
         # LayerConfig(inD=10,  # Input dimension
@@ -70,17 +81,17 @@ class Config:
 
     # Dataset parameters
     # Size of the whole dataset, including validation and test set.
-    DATASET_SIZE = 500
+    DATASET_SIZE = 700
 
     NOISE_PROBABILITY = 0.01
 
     IMAGE_SIZE = 16
 
     # Position bundaries for the center of cross/circle, and the position of the horizontal/vertical bars
-    X_RANGE = (4, 12)
-    Y_RANGE = (4, 12)
+    X_RANGE = (5, 11)
+    Y_RANGE = (5, 11)
 
-    RADIUS_RANGE = (4, 7)  # Radius range for circle and cross
+    RADIUS_RANGE = (3, 7)  # Radius range for circle and cross
 
     TEST_SET_PORTION = 0.1
     VALIDATION_SET_PORTION = 0.1
