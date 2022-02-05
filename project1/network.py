@@ -37,6 +37,8 @@ class Network():
 
                 self.backward_pass(Jlz)
 
+                self.update_weights()
+
                 if verbose:
                     print(
                         f"Input: {x} \nOutput: {result} \nTarget: {y} \nLoss: {loss}")
@@ -73,11 +75,24 @@ class Network():
             return Softmax.f(o)
         return o
 
+    def update_weights(self):
+        for l in self.layers:
+            l.update_weights()
+
     def backward_pass(self, Jlz):
         jlz = Jlz
         for i in range(len(self.layers)-1, -1, -1):
             # Go backwards through the network and update weights
             jlz = self.layers[i].backward_pass(jlz)
+
+    def test_loss(self, test_set):
+        score = 0
+        for x, y in zip(test_set.x, test_set.y):
+            score += self.loss_function.f(y, self.predict(x))
+
+        score = score / len(test_set.x)
+
+        return score
 
     def __str__(self) -> str:
         return f"{self.layers} Softmax: {self.softmax} L1: {self.l1_alpha}, L2: {self.l2_alpha}"

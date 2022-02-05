@@ -39,12 +39,13 @@ class Layer():
         self.Jlw = Jlz * self.Jzw_hat
         self.Jlb = Jlz * self.df
 
+        return self.Jly.copy()
+
+    def update_weights(self):
         self.W -= self.lr * self.Jlw + self.l1_alpha * \
             np.sign(self.W) + self.l2_alpha * self.W
 
         self.b -= self.lr * self.Jlb
-
-        return self.Jly.copy()
 
     def __str__(self) -> str:
         return f"Layer - shape: {self.W.shape}, f(a): {self.z}"
