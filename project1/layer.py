@@ -23,18 +23,19 @@ class Layer():
         self.z = None  # f(a)
         self.activation = layerConfig.activation
 
-    # Performs the forward pass given input x (row vector)
+    # Performs the forward pass given input y (row vector)
     def forward_pass(self, y) -> np.array:
+        self.y = y
         self.a = y @ self.W + self.b
         self.z = self.activation.f(self.a)
-        self.df = self.activation.f_prime(self.a)  # df = JZSum-diagonal
-        self.Jzy = np.einsum('ij,i->ij', self.W.T, self.df)  # Numerator form
-        self.Jzw_hat = np.outer(y, self.df)
 
         return self.z.copy()
 
     # Jlz is the jacobian matrix J L/Z , where L is the loss function and Z is the next layer
     def backward_pass(self, Jlz):
+        self.df = self.activation.f_prime(self.a)  # df = JZSum-diagonal
+        self.Jzy = np.einsum('ij,i->ij', self.W.T, self.df)  # Numerator form
+        self.Jzw_hat = np.outer(self.y, self.df)
         self.Jly = Jlz @ self.Jzy
         self.Jlw = Jlz * self.Jzw_hat
         self.Jlb = Jlz * self.df
