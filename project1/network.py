@@ -1,22 +1,20 @@
-from copy import deepcopy
 import numpy as np
 from layer import Layer
-from activation_functions import Sigmoid, ReLu, Softmax
-from config import Globals
+from activation_functions import Softmax
 
 
 class Network():
 
-    def __init__(self, layersConfig: list) -> None:
+    def __init__(self, networkConfig) -> None:
         self.layers = []
-        for c in layersConfig:
+        for c in networkConfig.layersConfig:
             self.layers.append(Layer(layerConfig=c))
-        self.l1_alpha = Globals.L1_ALPHA
-        self.l2_alpha = Globals.L2_ALPHA
-        self.loss_function = Globals.LOSS_FUNCION
-        self.softmax = Globals.SOFTMAX
+        self.l1_alpha = networkConfig.l1_alpha
+        self.l2_alpha = networkConfig.l2_alpha
+        self.loss_function = networkConfig.loss_function
+        self.softmax = networkConfig.softmax
 
-    def fit(self, x_train, y_train, epochs=Globals.EPOCHS, valid=None):
+    def fit(self, x_train, y_train, epochs=100, valid=None, verbose=False):
         self.train_scores = []
         self.valid_scores = []
         self.omega1 = []
@@ -33,9 +31,15 @@ class Network():
                     Jsz = Softmax.jacobian(result)
                     Jlz = Jlz @ Jsz
 
-                score += self.loss_function.f(y, result)
+                loss = self.loss_function.f(y, result)
+
+                score += loss
 
                 self.backward_pass(Jlz)
+
+                if verbose:
+                    print(
+                        f"Input: {x} \nOutput: {result} \nTarget: {y} \nLoss: {loss}")
 
             self.train_scores.append(np.array([i, score / len(x_train)]))
 

@@ -1,7 +1,4 @@
-from importlib_metadata import SelectableGroups
 import numpy as np
-from activation_functions import sigmoid, d_sigmoid, Sigmoid, ReLu
-from config import Globals
 
 
 class Layer():
@@ -20,8 +17,8 @@ class Layer():
             layerConfig.initial_weight_range[0] + \
             (1-b) * layerConfig.initial_weight_range[1]
         self.lr = layerConfig.lr
-        self.l1_alpha = Globals.L1_ALPHA
-        self.l2_alpha = Globals.L2_ALPHA
+        self.l1_alpha = layerConfig.l1_alpha
+        self.l2_alpha = layerConfig.l2_alpha
         self.a = None  # summed outputs
         self.z = None  # f(a)
         self.activation = layerConfig.activation
