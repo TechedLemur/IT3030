@@ -21,7 +21,7 @@ class Layer():
         self.l2_alpha = layerConfig.l2_alpha
         self.a = None  # summed outputs
         self.z = None  # f(a)
-        self.activation = layerConfig.activation
+        self.activation = layerConfig.activation  # Activation function
 
     # Performs the forward pass given input y (row vector)
     def forward_pass(self, y) -> np.array:
@@ -37,11 +37,12 @@ class Layer():
         self.Jzy = np.einsum('ij,i->ij', self.W.T, self.df)  # Numerator form
         self.Jzw_hat = np.outer(self.y, self.df)
         self.Jly = Jlz @ self.Jzy
-        self.Jlw = Jlz * self.Jzw_hat
-        self.Jlb = Jlz * self.df
+        self.Jlw = Jlz * self.Jzw_hat  # Weight derivative
+        self.Jlb = Jlz * self.df  # Bias derivative
 
         return self.Jly.copy()
 
+    # Update weights and biases
     def update_weights(self):
         self.W -= self.lr * self.Jlw + self.l1_alpha * \
             np.sign(self.W) + self.l2_alpha * self.W

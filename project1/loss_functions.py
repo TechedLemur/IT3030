@@ -1,5 +1,9 @@
 import numpy as np
 
+"""
+This file contains the loss functions. All loss functions have f, and f_prime methods.
+"""
+
 
 class MSE:
 

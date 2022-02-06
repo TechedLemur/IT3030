@@ -3,6 +3,11 @@ from loss_functions import MSE, CrossEntropy
 import configparser
 from data_generator import DataGenerator
 
+"""
+This is a utility file, hiding the details of parsing the config file.
+"""
+
+
 activation_functions = {'ReLu': ReLu,
                         'Sigmoid': Sigmoid,
                         'Linear': Linear,
@@ -11,6 +16,7 @@ activation_functions = {'ReLu': ReLu,
 loss_function = {'MSE': MSE, 'CrossEntropy':  CrossEntropy}
 
 
+# Configuration class for a layer
 class LayerConfig:
 
     def __init__(self, inD=None, outD=None, lr=0.01, activation=ReLu, initial_weight_range=(-0.5, 0.5), l1_alpha=0, l2_alpha=0) -> None:
@@ -23,6 +29,7 @@ class LayerConfig:
         self.l2_alpha = l2_alpha
 
 
+# Configuration class for a network
 class NetworkConfig:
 
     def __init__(self, layersConfig=None, loss_function=MSE, l1_alpha=0, l2_alpha=0, softmax=False) -> None:
@@ -33,6 +40,7 @@ class NetworkConfig:
         self.softmax = softmax
 
 
+# Returns a network configuration object from the given config file
 def get_network_from_config_file(filename: str) -> (NetworkConfig):
     parser = configparser.ConfigParser()
     parser.read(filename)
@@ -60,6 +68,7 @@ def get_network_from_config_file(filename: str) -> (NetworkConfig):
     return NetworkConfig(layersConfig=layers, loss_function=loss, l1_alpha=l1, l2_alpha=l2, softmax=softmax)
 
 
+# Returns datasets based on the given config file
 def get_data_from_config_file(filename: str):
     parser = configparser.ConfigParser()
     parser.read(filename)
@@ -97,6 +106,7 @@ def get_data_from_config_file(filename: str):
         radius_range=radius_range)
 
 
+# Get the run settings
 def get_run_config(filename: str):
     parser = configparser.ConfigParser()
     parser.read(filename)

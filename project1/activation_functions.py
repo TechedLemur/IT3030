@@ -1,5 +1,9 @@
-from mimetypes import init
 import numpy as np
+
+"""
+This file contains classes for the different activation funcions. Each function has an f, and f_prime method.
+"""
+
 
 # Sigmoid activation function
 

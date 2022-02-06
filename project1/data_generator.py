@@ -1,12 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+"""
+Wrapper class for the image array. Provides easy access to the flattened array.
+"""
+
 
 class Data():
     def __init__(self, img, y) -> None:
         self.y = y.astype(np.int8)
         self.img = img
         self.x = img.flatten().astype(np.int8)
+
+
+"""
+Class containing multiple Data objects.
+"""
 
 
 class DataSet():
@@ -16,6 +25,12 @@ class DataSet():
         self.y = list(map(lambda d: d.y, data_list))
 
 
+"""
+The data generator. 
+Contains static methods for generating boolean images.
+"""
+
+
 class DataGenerator:
 
     HORIZONTAL_ID = np.array([1, 0, 0, 0])
@@ -23,6 +38,7 @@ class DataGenerator:
     CROSS_ID = np.array([0, 0, 1, 0])
     CIRCLE_ID = np.array([0, 0, 0, 1])
 
+    # Returns a single horizontal bar
     @staticmethod
     def HorizontalBar(size: int = 16, position_range=(1, 15), side_boundaries=(0, 16)):
 
@@ -31,10 +47,12 @@ class DataGenerator:
         lower_bound = max(1, position_range[0])
         upper_bound = min(position_range[1], size - 1)
 
+        # Make a random number of lines
         for i in np.random.choice(np.arange(lower_bound, upper_bound), np.random.randint(1, min(int(size/4), upper_bound-lower_bound - 1))):
             img[i, side_boundaries[0]:side_boundaries[1]] = np.True_
         return img
 
+    # Returns a single vertical bar
     @staticmethod
     def VerticalBar(size: int = 16, position_range=(1, 16), side_boundaries=(0, 16)):
 
@@ -43,10 +61,12 @@ class DataGenerator:
         lower_bound = max(1, position_range[0])
         upper_bound = min(position_range[1], size - 1)
 
+        # Make a random number of lines
         for i in np.random.choice(np.arange(lower_bound, upper_bound), np.random.randint(1, min(int(size/4), upper_bound-lower_bound - 1))):
             img[side_boundaries[0]:side_boundaries[1], i] = np.True_
         return img
 
+    # Returns a single cross
     @staticmethod
     def Cross(size: int = 16, x_range=(1, 16), y_range=(1, 16), radius_range=(1, 15)):
 
@@ -55,15 +75,20 @@ class DataGenerator:
         lower_bound = max(5, x_range[0])
         upper_bound = min(x_range[1], size - 5)
 
+        # Select x coordinate
         x = np.random.randint(lower_bound, upper_bound)
 
         lower_bound = max(5, y_range[0])
         upper_bound = min(y_range[1], size - 5)
 
+        # Select y coordinate
         y = np.random.randint(lower_bound, upper_bound)
 
+        # Select random horizontal part length
         h_length = min(x - 1, size - x-1,
                        np.random.random_integers(radius_range[0], radius_range[1]))
+
+        # Select random vertical part length (horizontal +- 2)
         v_length = min(y - 1, size - y-1,
                        np.random.random_integers(h_length-2, h_length+2))
 
@@ -71,23 +96,28 @@ class DataGenerator:
         img[x, y-v_length:y+v_length] = np.True_
         return img
 
+    # Returns a single circle
     @staticmethod
     def Circle(size: int = 16, x_range=(1, 16), y_range=(1, 16), radius_range=(1, 15)):
 
         lower_bound = max(5, x_range[0])
         upper_bound = min(x_range[1], size - 5)
 
+        # Select x coordinate
         x = np.random.randint(lower_bound, upper_bound)
 
         lower_bound = max(5, y_range[0])
         upper_bound = min(y_range[1], size - 5)
 
+        # Select y coordinate
         y = np.random.randint(lower_bound, upper_bound)
 
+        # Select random radius
         r = min(x - 1, size - x-1, y - 1, size - y-1,
                 np.random.random_integers(radius_range[0], radius_range[1]))
 
         x_ind, y_ind = np.indices((size, size))
+        # Calculate circle based on hypotenuse
         return np.abs(np.hypot(x - x_ind, y - y_ind)-r) < 0.5
 
     # Returns an image with added random noise with probability p
@@ -99,6 +129,7 @@ class DataGenerator:
 
         return np.bitwise_xor(img, mask)
 
+    # Returns n circles
     @staticmethod
     def GetCircles(n: int, size: int = 16, noise: float = 0.01, x_range=(1, 16), y_range=(1, 16), radius_range=(1, 15)):
         c = []
@@ -109,6 +140,7 @@ class DataGenerator:
 
         return c
 
+    # Returns n Horizontal bars
     @staticmethod
     def GetHorizontalBars(n: int, size: int = 16, noise: float = 0.01, position_range=(1, 16), side_boundaries=(0, 16)):
         c = []
@@ -119,6 +151,7 @@ class DataGenerator:
 
         return c
 
+    # Returns n vertical bars
     @staticmethod
     def GetVerticalBars(n: int, size: int = 16, noise: float = 0.01, position_range=(1, 16), side_boundaries=(0, 16)):
         c = []
@@ -129,6 +162,7 @@ class DataGenerator:
 
         return c
 
+    # Returns n crosses
     @staticmethod
     def GetCrosses(n: int, size: int = 16, noise: float = 0.01, x_range=(1, 16), y_range=(1, 16), radius_range=(1, 15)):
         c = []
@@ -139,6 +173,7 @@ class DataGenerator:
 
         return c
 
+    # Returns three datasets (train, test, valid)
     @staticmethod
     def GetTrainTestValid(
             image_size: int = 16,
@@ -200,6 +235,7 @@ class DataGenerator:
         np.random.shuffle(valid)
         return DataSet(train), DataSet(test), DataSet(valid)
 
+    # Plots 20 random images from the dataset argument
     @staticmethod
     def show20Random(dataset):
         plt.figure(figsize=(20, 20))
