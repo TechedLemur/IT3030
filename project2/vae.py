@@ -35,10 +35,8 @@ class VariationalAutoEncoder():
                           activation="relu")(encoder_input)
         x = layers.Conv2D(32, 3, strides=2, padding=padding,
                           activation="relu")(x)
-        # x = layers.Conv2D(64, 5, strides=1, padding=padding, activation="relu")(x)
         x = layers.Conv2D(64, 3, strides=2, padding=padding,
                           activation="relu")(x)
-        # x = layers.Conv2D(128, 7, strides=1, padding=padding, activation="relu")(x)
 
         x = layers.Flatten()(x)
 
@@ -47,7 +45,7 @@ class VariationalAutoEncoder():
 
         encoder_output = tfp.layers.IndependentNormal(
             latent_size,
-            activity_regularizer=tfp.layers.KLDivergenceRegularizer(prior, weight=2))(x)
+            activity_regularizer=tfp.layers.KLDivergenceRegularizer(prior, weight=1))(x)
 
         encoder = keras.Model(encoder_input, encoder_output, name="encoder")
 
@@ -56,12 +54,12 @@ class VariationalAutoEncoder():
         x = layers.Conv2DTranspose(
             64, 7, strides=1, padding='valid', activation="relu")(x)
         x = layers.Conv2DTranspose(
-            64, 5, strides=2, padding='same', activation="relu")(x)
+            64, 5, strides=2, padding=padding, activation="relu")(x)
         x = layers.Conv2DTranspose(
-            32, 5, strides=2, padding='same', activation='relu')(x)
+            32, 5, strides=2, padding=padding, activation='relu')(x)
 
         x = layers.Conv2DTranspose(
-            1, 5, strides=1, padding='same', activation=None)(x)
+            1, 5, strides=1, padding=padding, activation=None)(x)
         x = layers.Flatten()(x)
 
         decoder_output = tfp.layers.IndependentBernoulli(
@@ -144,7 +142,7 @@ class VariationalAutoEncoder():
                 "Model is not trained, so makes no sense to try to use it")
 
         # return self.decoder.predict(data)
-        return self.decoder(data).mode()
+        return self.decoder(data).mean()
 
     def encode(self, data: np.ndarray):
         if self.done_training is False:
@@ -155,11 +153,11 @@ class VariationalAutoEncoder():
         no_channels = data.shape[-1]
         channels = []
         for channel in range(no_channels):
-            channels.append(self.encoder(data[:, :, :, [channel]]).mean())
+            channels.append(self.encoder(data[:, :, :, [channel]]).mode())
 
         return np.concatenate(channels, axis=3)
 
-    def generate_images(self, n: int, no_channels=1):
+    def generate_images(self, n: int, no_channels=1, mode=True):
         if self.done_training is False:
             # Model is not trained yet...
             raise ValueError(
@@ -167,11 +165,14 @@ class VariationalAutoEncoder():
         channels = []
         for channel in range(no_channels):
             z = np.random.randn(n, self.latent_size)
+            if mode:
+                channels.append(self.decoder(z).mode())
+            else:
+                channels.append(self.decoder(z).mean())
 
-            channels.append(self.decoder(z).mode())
         return np.concatenate(channels, axis=3)
 
-    def autoencode(self, data: np.ndarray):
+    def autoencode(self, data: np.ndarray, mode=True):
 
         if self.done_training is False:
             # Model is not trained yet...
@@ -180,7 +181,13 @@ class VariationalAutoEncoder():
 
         no_channels = data.shape[-1]
         channels = []
+
         for channel in range(no_channels):
-            channels.append(self.autoencoder(data[:, :, :, [channel]]).mode())
+            if mode:
+                channels.append(self.autoencoder(
+                    data[:, :, :, [channel]]).mode())
+            else:
+                channels.append(self.autoencoder(
+                    data[:, :, :, [channel]]).mean())
 
         return np.concatenate(channels, axis=3)

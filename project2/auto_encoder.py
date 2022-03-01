@@ -1,12 +1,9 @@
 
 import numpy as np
-from stacked_mnist import StackedMNISTData
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.callbacks import TensorBoard
 import time
-import matplotlib.pyplot as plt
-import pickle
 
 
 class AutoEncoder():
@@ -21,23 +18,41 @@ class AutoEncoder():
         self.file_name = file_name
 
         padding = 'same'
+        latent_size = 10
 
+        # Define encoder
         encoder_input = keras.Input(shape=(28, 28, 1), name="image_input")
-        x = layers.Conv2D(16, 3, strides=(2, 2), padding=padding,
+        x = layers.Conv2D(32, 5, strides=1, padding=padding,
                           activation="relu")(encoder_input)
+        x = layers.Conv2D(64, 3, strides=2,
+                          activation='relu', padding=padding)(x)
+        x = layers.Dropout(0.2)(x)
 
-        encoder_output = layers.Conv2D(
-            4, 3, strides=(2, 2), padding=padding, activation='sigmoid')(x)
+        x = layers.Conv2D(64, 3, strides=1,
+                          activation='relu', padding=padding)(x)
+        x = layers.Dropout(0.2)(x)
+
+        x = layers.Flatten()(x)
+        s = x.shape[-1]
+        encoder_output = layers.Dense(latent_size, activation='relu')(x)
 
         encoder = keras.Model(encoder_input, encoder_output, name="encoder")
 
-        decoder_input = encoder_output
-        x = layers.Conv2DTranspose(8, 2, strides=(
-            2, 2), padding=padding, activation="relu")(decoder_input)
-        x = layers.Conv2DTranspose(16, 3, strides=(
-            2, 2), padding=padding, activation="relu")(x)
+        # Define decoder
+        decoder_input = keras.Input(shape=latent_size, name='decoder_input')
+
+        x = layers.Dense(s, activation='relu')(decoder_input)
+        x = layers.Reshape((14, 14, 64))(x)
+        x = layers.Conv2DTranspose(
+            32, 5, strides=1, padding='same', activation="relu")(x)
+        x = layers.Dropout(0.3)(x)
+        x = layers.Conv2DTranspose(
+            32, 3, strides=1, padding='same', activation="relu")(x)
+        x = layers.Dropout(0.2)(x)
+        x = layers.Conv2DTranspose(
+            16, 3, strides=2, padding='same', activation="relu")(x)
         decoder_output = layers.Conv2DTranspose(
-            1, 3, padding=padding, activation='sigmoid')(x)
+            1, 3, strides=1, padding='same', activation='sigmoid')(x)
 
         decoder = keras.Model(decoder_input, decoder_output, name="decoder")
 
@@ -55,6 +70,8 @@ class AutoEncoder():
         self.decoder = decoder
 
         self.done_training = self.load_weights()
+
+        self.latent_size = latent_size
 
     def load_weights(self):
         # noinspection PyBroadException
@@ -96,7 +113,7 @@ class AutoEncoder():
             x_test = x_test[:, :, :, [0]]
 
             # Fit model
-            self.autoencoder.fit(x=x_train, y=x_train, shuffle=True, batch_size=1024, epochs=epochs,
+            self.autoencoder.fit(x=x_train, y=x_train, shuffle=True, batch_size=512, epochs=epochs,
                                  validation_data=(x_test, x_test),  callbacks=[tensorboard_callback])
 
             # Save weights and leave
@@ -125,17 +142,16 @@ class AutoEncoder():
         for channel in range(no_channels):
             channels.append(self.encoder.predict(data[:, :, :, [channel]]))
 
-        return np.concatenate(channels, axis=3)
+        return np.concatenate(channels, axis=1)
 
-    def generate_images(self, n: int):
+    def generate_images(self, n: int, no_channels=1):
         if self.done_training is False:
             # Model is not trained yet...
             raise ValueError(
                 "Model is not trained, so makes no sense to try to use it")
         channels = []
-        for channel in range(self.no_channels):
-            z = np.random.randn(n, 7, 7, 4)+0.5
-
+        for channel in range(no_channels):
+            z = np.random.rand(n, self.latent_size) * 20
             channels.append(self.decoder.predict(z))
         return np.concatenate(channels, axis=3)
 
@@ -152,22 +168,3 @@ class AutoEncoder():
             channels.append(self.autoencoder.predict(data[:, :, :, [channel]]))
 
         return np.concatenate(channels, axis=3)
-
-    @staticmethod
-    def plot_n_images(n, original, output):
-        plt.figure(figsize=(20, 4))
-        for i in range(1, n + 1):
-            # Display original
-            ax = plt.subplot(2, n, i)
-            plt.imshow(original[i].reshape(28, 28))
-            plt.gray()
-            ax.get_xaxis().set_visible(False)
-            ax.get_yaxis().set_visible(False)
-
-            # Display reconstruction
-            ax = plt.subplot(2, n, i + n)
-            plt.imshow(output[i].reshape(28, 28))
-            plt.gray()
-            ax.get_xaxis().set_visible(False)
-            ax.get_yaxis().set_visible(False)
-        plt.show()

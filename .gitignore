@@ -130,4 +130,5 @@ dmypy.json
 
 
 project2/models/
+project2/.models/
 project2/logs/
