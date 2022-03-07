@@ -18,7 +18,7 @@ class AutoEncoder():
         self.file_name = file_name
 
         padding = 'same'
-        latent_size = 10
+        latent_size = 20
 
         # Define encoder
         encoder_input = keras.Input(shape=(28, 28, 1), name="image_input")
@@ -151,7 +151,7 @@ class AutoEncoder():
                 "Model is not trained, so makes no sense to try to use it")
         channels = []
         for channel in range(no_channels):
-            z = np.random.rand(n, self.latent_size) * 20
+            z = np.random.rand(n, self.latent_size) * 45
             channels.append(self.decoder.predict(z))
         return np.concatenate(channels, axis=3)
 
