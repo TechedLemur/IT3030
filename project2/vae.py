@@ -25,7 +25,7 @@ class VariationalAutoEncoder():
 
         padding = 'same'
 
-        latent_size = 8
+        latent_size = 16
 
         prior = tfp.distributions.Independent(tfp.distributions.Normal(loc=tf.zeros(latent_size), scale=1.),
                                               reinterpreted_batch_ndims=1)
@@ -191,3 +191,33 @@ class VariationalAutoEncoder():
                     data[:, :, :, [channel]]).mean())
 
         return np.concatenate(channels, axis=3)
+
+    def get_n_anomalies(self, n, img):
+        loss = keras.losses.BinaryCrossentropy(
+            from_logits=False,
+            label_smoothing=0.0,
+            axis=-1,
+            reduction="none",
+            name="binary_crossentropy",
+        )
+        N = 10000
+        no_channels = img.shape[-1]
+
+        p_x = np.zeros(len(img))
+        for i in range(len(img)):
+
+            channels = []
+            for c in range(no_channels):
+                z = np.random.randn(1, 16)
+                channels.append(self.decode_channel(z))
+
+            dec = np.concatenate(channels, axis=3)
+            I = img[i:i+1].repeat(N, axis=0)
+            p = loss(I, dec)  # Shape=(N,28,28)
+            p = np.average(p, axis=1)  # Shape=(N, 28)
+            p = np.average(p, axis=1)  # Shape = (N,)
+
+            p = np.exp(-p)
+            p = np.average(p)
+            p_x[i] = p
+        return np.argpartition(p_x, n)[:n+1]
