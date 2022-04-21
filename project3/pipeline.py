@@ -70,12 +70,12 @@ class Pipeline:
         df['time_of_year'] = dt.apply(lambda x: x.month % 12 // 3)
         df['new_hour'] = dt.apply(lambda x: (x.minute == 0)).astype(np.float32)
 
-        df['time_of_day_sin'] = np.sin(df['time_of_day'] * (2 * np.pi / 23))
-        df['time_of_day_cos'] = np.cos(df['time_of_day'] * (2 * np.pi / 23))
-        df['time_of_week_sin'] = np.sin(df['time_of_week'] * (2 * np.pi / 6))
-        df['time_of_week_cos'] = np.cos(df['time_of_week'] * (2 * np.pi / 6))
-        df['time_of_year_sin'] = np.sin(df['time_of_year'] * (2 * np.pi / 11))
-        df['time_of_year_cos'] = np.cos(df['time_of_year'] * (2 * np.pi / 11))
+        df['time_of_day_sin'] = np.sin(df['time_of_day'] * (2 * np.pi / 24))
+        df['time_of_day_cos'] = np.cos(df['time_of_day'] * (2 * np.pi / 24))
+        df['time_of_week_sin'] = np.sin(df['time_of_week'] * (2 * np.pi / 7))
+        df['time_of_week_cos'] = np.cos(df['time_of_week'] * (2 * np.pi / 7))
+        df['time_of_year_sin'] = np.sin(df['time_of_year'] * (2 * np.pi / 12))
+        df['time_of_year_cos'] = np.cos(df['time_of_year'] * (2 * np.pi / 12))
 
         last_day_offset = 24*60 // 5  # timesteps are 5 minutes
         last_week_offset = 7 * 24*60 // 5
