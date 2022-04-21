@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.python.keras import layers
+from tensorflow.python.keras.callbacks import TensorBoard
 
 
 class RNN:
@@ -11,6 +11,7 @@ class RNN:
 
     def train(self) -> None:
         pass
+        layers.LSTM()
 
     def predict(self, x):
         pass
