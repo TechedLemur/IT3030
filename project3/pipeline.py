@@ -9,7 +9,7 @@ from scipy import interpolate
 class Pipeline:
 
     @staticmethod
-    def format_data(data: pd.DataFrame, k: int, features: list[str], drop_prev_no=0) -> Tuple[np.ndarray, np.array]:
+    def format_data(data: pd.DataFrame, k: int, features: list[str], noise_prev_no=0) -> Tuple[np.ndarray, np.array]:
         '''
         input:
             data - the pandas dataframe of (n, p+1) shape, where n is the number of rows,
@@ -31,15 +31,14 @@ class Pipeline:
         # run loop to slice k-number of previous rows as 1 sequence to predict
         # 1 target and save them to X_data matrix and y_data list
 
-        p = 0.05
         for i in range(k, x.shape[0]):
-            cur_sequence = x[i-k: i]
+            cur_sequence = x[i-k: i].copy()
             cur_target = y[i-1]
 
-            if drop_prev_no > 0:
-                mask = np.random.choice(
-                    a=[0, 1], size=(drop_prev_no), p=[p, 1-p])
-                cur_sequence[-drop_prev_no:, -1] *= mask
+            if noise_prev_no > 0:
+                sigma = 0.1
+                noise = sigma * np.random.randn(noise_prev_no)
+                cur_sequence[:noise_prev_no, -1] += noise
 
             X_data[i-k, :, :] = cur_sequence.reshape(1, k, X_data.shape[2])
             y_data.append(cur_target)
