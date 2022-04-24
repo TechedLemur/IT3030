@@ -1,0 +1,1 @@
+{"features": ["hydro", "micro", "thermal", "wind", "total", "flow", "time_of_year_sin", "time_of_year_cos", "time_of_hour_sin", "time_of_hour_cos", "sum", "structural_imbalance", "previous_y"], "k": 60, "comments": "Removed some features"}

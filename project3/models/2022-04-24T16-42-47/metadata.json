@@ -1,0 +1,1 @@
+{"features": ["hydro", "micro", "thermal", "wind", "total", "sys_reg", "flow", "time_of_day_sin", "time_of_day_cos", "time_of_week_sin", "time_of_week_cos", "time_of_year_sin", "time_of_year_cos", "time_of_hour_sin", "time_of_hour_cos", "new_hour", "sum", "structural_imbalance", "prev_day_y", "prev_week_y", "previous_y"], "k": 60, "comments": "Noise on all, sigma=0.1"}
