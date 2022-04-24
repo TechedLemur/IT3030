@@ -11,17 +11,26 @@ from tensorflow.keras import regularizers
 
 class RNN:
 
-    def __init__(self, k, no_features) -> None:
+    def __init__(self, k, no_features, altered=False) -> None:
         self.k = k
         input_layer = keras.Input(shape=(k, no_features))
+
+        lr = 0.00012
 
         x = layers.LSTM(30, return_sequences=True, kernel_regularizer=regularizers.L1L2(l1=1e-5, l2=1e-4),
                         bias_regularizer=regularizers.L2(1e-4),
                         activity_regularizer=regularizers.L2(1e-5))(input_layer)
         x = layers.Dropout(0.13)(x)
-        x = layers.LSTM(20, kernel_regularizer=regularizers.L1L2(l1=1e-5, l2=1e-4),
+        x = layers.LSTM(20,  return_sequences=altered, kernel_regularizer=regularizers.L1L2(l1=1e-5, l2=1e-4),
                         bias_regularizer=regularizers.L2(1e-4),
                         activity_regularizer=regularizers.L2(1e-5))(x)
+
+        if altered:
+            lr = 0.00013
+            x = layers.Dropout(0.12)(x)
+            x = layers.LSTM(25, kernel_regularizer=regularizers.L1L2(l1=1e-5, l2=1e-4),
+                            bias_regularizer=regularizers.L2(1e-4),
+                            activity_regularizer=regularizers.L2(1e-5))(x)
         x = layers.Dropout(0.12)(x)
         x = layers.Dense(100, activation='relu', kernel_regularizer=regularizers.L1L2(l1=1e-5, l2=1e-4),
                          bias_regularizer=regularizers.L2(1e-4),
@@ -32,9 +41,9 @@ class RNN:
         model = keras.Model(input_layer, output_layer, name='LSTM_Model')
 
         model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.00012),
-            # loss=keras.losses.MeanSquaredError()
-            loss=RNN.root_mean_squared_error
+            optimizer=keras.optimizers.Adam(learning_rate=lr),
+            loss=keras.losses.MeanSquaredError()
+            # loss=RNN.root_mean_squared_error
 
 
         )
@@ -81,10 +90,13 @@ class RNN:
         plt.savefig("./figures/training_loss.png")
         plt.show()
 
-    def forecast_15(self, x, y, M=100, n=20, replace=True, path=""):
+    def forecast_15(self, x, y, M=100, n=20, replace=True, path="", benchmark=False):
         plt.figure(figsize=(20, 20))
         for i in range(15):
-            s = np.random.randint(M, len(x)-M)
+            if benchmark:
+                s = M + i*n
+            else:
+                s = np.random.randint(M, len(x)-M)
             p = self.forecast(x, n=n, s=s, replace=replace)
 
             t = np.arange(len(x))

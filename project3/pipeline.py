@@ -38,7 +38,7 @@ class Pipeline:
             if noise_prev_no > 0:
                 sigma = 0.1
                 noise = sigma * np.random.randn(noise_prev_no)
-                cur_sequence[:noise_prev_no, -1] += noise
+                cur_sequence[-noise_prev_no:, -1] += noise
 
             X_data[i-k, :, :] = cur_sequence.reshape(1, k, X_data.shape[2])
             y_data.append(cur_target)
