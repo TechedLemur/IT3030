@@ -1,9 +1,6 @@
-from sklearn import metrics
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
 from tensorflow.keras import backend as K
 from tensorflow.keras import regularizers
@@ -15,7 +12,7 @@ class RNN:
         self.k = k
         input_layer = keras.Input(shape=(k, no_features))
 
-        lr = 0.00012
+        lr = 0.000125
 
         x = layers.LSTM(30, return_sequences=True, kernel_regularizer=regularizers.L1L2(l1=1e-5, l2=1e-4),
                         bias_regularizer=regularizers.L2(1e-4),
@@ -42,8 +39,8 @@ class RNN:
 
         model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=lr),
-            loss=keras.losses.MeanSquaredError()
-            # loss=RNN.root_mean_squared_error
+            # loss=keras.losses.MeanSquaredError()
+            loss=RNN.root_mean_squared_error
 
 
         )
@@ -66,7 +63,6 @@ class RNN:
 
         preds = np.zeros(s+n)
         x_t = x.copy()
-        # model(x_test[:w])
         for i in range(n):
             p = self.model(x_t[s+i:s+i+1])[0][0]
             if replace:
@@ -91,6 +87,9 @@ class RNN:
         plt.show()
 
     def forecast_15(self, x, y, M=100, n=20, replace=True, path="", benchmark=False):
+        """
+        Forecast and plot 15 random sequences of length n
+        """
         plt.figure(figsize=(20, 20))
         for i in range(15):
             if benchmark:

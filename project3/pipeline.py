@@ -36,7 +36,7 @@ class Pipeline:
             cur_target = y[i-1]
 
             if noise_prev_no > 0:
-                sigma = 0.1
+                sigma = 0.12
                 noise = sigma * np.random.randn(noise_prev_no)
                 cur_sequence[-noise_prev_no:, -1] += noise
 
@@ -56,8 +56,8 @@ class Pipeline:
         df['flow'] = -df['flow']  # Flip sign because of mistake in dataset
 
         df.loc[df['y'] < -5000, 'y'] = 5.687162  # Set wrong values to mean
-        df.loc[df['y'] > 5000, 'y'] = 5.687162  # Set wrong values to mean
-        # TODO: CLip more values
+        # Set wrong values to mean (mean of train set)
+        df.loc[df['y'] > 5000, 'y'] = 5.687162
         df = df.drop(columns='river')  # Drop useless column
 
         # Time features
@@ -71,6 +71,7 @@ class Pipeline:
 
         df['new_hour'] = dt.apply(lambda x: (x.minute == 0)).astype(np.float32)
 
+        # Encode cyclical features
         df['time_of_day_sin'] = np.sin(df['time_of_day'] * (2 * np.pi / 24))
         df['time_of_day_cos'] = np.cos(df['time_of_day'] * (2 * np.pi / 24))
         df['time_of_week_sin'] = np.sin(df['time_of_week'] * (2 * np.pi / 7))
