@@ -14,6 +14,6 @@ Also includes a self-made data-generator which generate images containing differ
 
 Implemented standard Auto-Encoders and Variational Auto-Encoders for use on a 3-channel MNIST dataset.
 
-## Project 2 - Time series forecasting with LSTMs
+## Project 3 - Time series forecasting with LSTMs
 
 Forecast power grid imbalance using a Recurrent Neural Network (RNN) based model.
